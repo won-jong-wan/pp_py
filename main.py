@@ -7,17 +7,20 @@ Created on Sat Jun 29 01:10:10 2024
 
 from collections import deque as dq
 import numpy as np
+import networkx as nx
 
 grid_column_num = 3
 grid_row_num = 2
 grid_level = 3
 
-grid = np.zeros([grid_column_num, grid_row_num, grid_level])
-
 robot_pose = (0, 0) # 몇 번째 열인지, 몇 번째 행인지
 robot_orientation = (1, 1) # 음의 열 쪽인지:-1 양의 열 쪽인지:1, 음의 행 쪽인지:-1 양의 행 쪽인지:1
 robot_load = ("none", 0, 0) # (이름, id, priority)
 # 이름이 none이면 비어있는 것
+
+grid = [[[]for row in range(grid_row_num)]for col in range(grid_column_num)]
+
+grid[1][1].append(("test", 1, 1))
 
 work_dq = dq()
 scatter_dq = dq()
@@ -50,23 +53,24 @@ def checkPick(suspect):
         work_dq.append(move_order)
         return False
     
-    # pick 혹은 place 위치를 타 기물이 막고 있을 때 
+    # pick 위치를 타 기물이 막고 있을 때
+    elif len(grid[suspect[1][0]-1][suspect[1][1]-1]) > suspect[2] and suspect[2] != -1:
+        work_dq.append(suspect)
+        
+        pick_order = ("pick", suspect[1], -1)
+        work_dq.append(pick_order)
+        return False
     
     # scatter_dq와 연계 필요
     else:
         return True
 
-def comuPick():
-    ### 집는 함수 구현
-    print("pick!")
-    
-    #robot_load 바뀌어야함
-    #suspect 받아와야 할 수도
-    return
-
 #place시 다운 파트에 물품이 존재함을 인지하여 설계    
 def checkPlace(suspect):
-    # pick 혹은 place 위치를 타 기물이 막고 있을 때 
+    # place 위치를 타 기물이 막고 있을 때 
+    ## 들고 있던 화물 내려놓기
+    ## 막고 있는 화물 치우기
+    ## 내려놓은 화물 집기
 
     
     # 해당 위치 위에 었지 않을 때
@@ -78,6 +82,15 @@ def checkPlace(suspect):
         return False
     else:
         return True
+
+def comuPick(suspect):
+    ### 집는 함수 구현
+    print("pick!")
+    
+    #robot_load 바뀌어야함
+    global robot_load
+    robot_load = grid[suspect[1][0]-1][suspect[1][1]-1][0]
+    return
     
 def comuPlace():
     ### 내려놓는 함수 구현
@@ -96,7 +109,7 @@ def comuMove(suspect):
     robot_pose = suspect[2]
     return
 
-pick_order = ("pick", (2, 2), 1) # (2, 2)의 1층으로 운송 
+pick_order = ("pick", (2, 2), 1) # (2, 2)의 1층을 집음
 place_order = ("place", (1, 1), -1) # level이 -1인 경우 기존 층 위에 쌓음
 
 work_dq.appendleft(pick_order) # que처럼 사용
@@ -107,7 +120,7 @@ while len(work_dq) != 0:
     if suspect[0] == "pick":
         sign = checkPick(suspect)
         if sign:
-            comuPick()
+            comuPick(suspect)
     elif suspect[0] == "place":
         sign = checkPlace(suspect)
         if sign:

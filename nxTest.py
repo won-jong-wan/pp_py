@@ -9,17 +9,21 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
-A = [
-    [0, 1,  0,  .8, 0],
-    [0, 0,  .4, 0,  .3],
-    [0, 0,  0,  0,  0],
-    [0, 0,  .6, 0,  .7],
-    [0, 0,  0,  .2, 0]]
+c = 1
+r = 1
 
-G = nx.from_numpy_array(np.matrix(A), create_using=nx.DiGraph)
+adj_matrix = [
+    [0, c, 0, r+c, 0, 0],
+    [c, 0, c, 0, r+c, 0],
+    [0, c, 0,  0, 0, r+c],
+    [r+c, 0, 0, 0, c, 0],
+    [0, r+c, 0, c, 0, c],
+    [0, 0, r+c, 0, c, 0]]
 
-pos=nx.spring_layout(G) # 각 노드, 엣지를 draw하기 위한 position 정보
-weight = nx.get_edge_attributes(G, 'weight')
+grid = nx.from_numpy_array(np.matrix(adj_matrix), create_using=nx.DiGraph)
 
-nx.draw(G,pos,with_labels=True)
-nx.draw_networkx_edge_labels(G,pos, edge_labels=weight)
+pos=nx.spring_layout(grid) # 각 노드, 엣지를 draw하기 위한 position 정보
+weight = nx.get_edge_attributes(grid, 'weight')
+
+nx.draw(grid,pos,with_labels=True)
+nx.draw_networkx_edge_labels(grid,pos, edge_labels=weight)
