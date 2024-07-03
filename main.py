@@ -20,7 +20,7 @@ robot_load = ("none", 0, 0) # (이름, id, priority)
 
 grid = [[[]for row in range(grid_row_num)]for col in range(grid_column_num)]
 
-grid[1][1].append(("test", 1, 1))
+grid[2][2].append(("test", 0, 1))
 
 work_dq = dq()
 scatter_dq = dq()
