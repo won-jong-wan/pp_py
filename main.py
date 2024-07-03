@@ -20,10 +20,12 @@ robot_load = ("none", 0, 0) # (이름, id, priority)
 
 grid = [[[]for row in range(grid_row_num)]for col in range(grid_column_num)]
 
-grid[2][2].append(("test", 0, 1))
-
 work_dq = dq()
 scatter_dq = dq()
+
+def findEmptyGrid(target_pose):
+    
+    return
 
 def checkPick(suspect):
     # 물품을 집고 있을 때
@@ -54,7 +56,7 @@ def checkPick(suspect):
         return False
     
     # pick 위치를 타 기물이 막고 있을 때
-    elif len(grid[suspect[1][0]-1][suspect[1][1]-1]) > suspect[2] and suspect[2] != -1:
+    elif len(grid[suspect[1][0]][suspect[1][1]]) > suspect[2] and suspect[2] != -1:
         work_dq.append(suspect)
         
         pick_order = ("pick", suspect[1], -1)
@@ -73,7 +75,7 @@ def checkPlace(suspect):
     ## 내려놓은 화물 집기
 
     
-    # 해당 위치 위에 었지 않을 때
+    # 해당 위치 위에 있지 않을 때
     if suspect[1] is not robot_pose:        
         work_dq.append(suspect) # stack처럼 사용
         
@@ -85,18 +87,19 @@ def checkPlace(suspect):
 
 def comuPick(suspect):
     ### 집는 함수 구현
-    print("pick!")
+    global robot_load, grid
     
-    #robot_load 바뀌어야함
-    global robot_load
-    robot_load = grid[suspect[1][0]-1][suspect[1][1]-1][0]
+    robot_load = grid[suspect[1][0]][suspect[1][1]].pop()
+    
+    print("pick: "+str(robot_load))
     return
     
 def comuPlace():
     ### 내려놓는 함수 구현
-    print("place!")
+    global robot_load, grid
+    print("place: "+str(robot_load))
     
-    global robot_load
+    grid[suspect[1][0]][suspect[1][1]].append(robot_load)
     robot_load = ("none", 0, 0)
     # place 끝난 이후 scatter_dq를 이용한 정리 필요
     return
@@ -109,8 +112,10 @@ def comuMove(suspect):
     robot_pose = suspect[2]
     return
 
-pick_order = ("pick", (2, 2), 1) # (2, 2)의 1층을 집음
-place_order = ("place", (1, 1), -1) # level이 -1인 경우 기존 층 위에 쌓음
+grid[1][1].append(("test", 0, 1))
+
+pick_order = ("pick", (1, 1), 1) # (2, 2)의 1층을 집음
+place_order = ("place", (2, 1), -1) # level이 -1인 경우 기존 층 위에 쌓음
 
 work_dq.appendleft(pick_order) # que처럼 사용
 work_dq.appendleft(place_order)
