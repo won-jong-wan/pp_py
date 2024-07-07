@@ -9,22 +9,16 @@ from collections import deque as dq
 import numpy as np
 import networkx as nx
 
-grid_column_num = 3
-grid_row_num = 2
-grid_level = 3
+def calcMonoTime(target_s):
+    t_acc = max_v/max_a
+    t_static = target_s/max_v - t_acc
 
-robot_pose = (0, 0) # 몇 번째 열인지, 몇 번째 행인지
-robot_orientation = (1, 1) # 음의 열 쪽인지:-1 양의 열 쪽인지:1, 음의 행 쪽인지:-1 양의 행 쪽인지:1
-robot_load = ("none", 0, 0) # (이름, id, priority)
-# 이름이 none이면 비어있는 것
-
-grid = [[[]for row in range(grid_row_num)]for col in range(grid_column_num)]
-
-work_dq = dq()
-scatter_dq = dq()
+    t_total = t_acc*2 + t_static
+    return t_total
 
 def findEmptyGrid(target_pose):
     
+    # bfs 
     return
 
 def checkPick(suspect):
@@ -111,6 +105,25 @@ def comuMove(suspect):
     global robot_pose
     robot_pose = suspect[2]
     return
+
+max_v = 0.3 # 0.3m/s
+max_a = 0.4 # 1m/s^2
+
+rotate_delay = 2 # 2초
+
+grid_column_num = 3
+grid_row_num = 2
+grid_level = 3
+
+robot_pose = (0, 0) # 몇 번째 열인지, 몇 번째 행인지
+robot_orientation = "row" # row or col
+robot_load = ("none", 0, 0) # (이름, id, priority)
+# 이름이 none이면 비어있는 것
+
+grid = [[[]for row in range(grid_row_num)]for col in range(grid_column_num)]
+
+work_dq = dq()
+scatter_dq = dq()
 
 grid[1][1].append(("test", 0, 1))
 
