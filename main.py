@@ -71,8 +71,12 @@ def checkPick(suspect):
         place_order = ("place", near_pose, -1) # 기존 층 위에 쌓는 -1
         
         # 역순으로 stack에 쌓기
-        work_dq.append(place_order)
-        work_dq.append(move_order)
+        sub_dq = dq()
+        sub_dq.extendleft([move_order, place_order])
+        
+        work_dq.extend(sub_dq)
+        # work_dq.append(place_order)
+        # work_dq.append(move_order)
         
         return False
     
@@ -103,44 +107,55 @@ def checkPlace(suspect):
     ## 막고 있는 화물 치우기
     ## 내려놓은 화물 집기
     on = len(grid[suspect[1][0]][suspect[1][1]]) >= suspect[2] and suspect[2] != -1 
-    load = robot_load[0] != "none"
+    # load = robot_load[0] != "none"
     
-    if on and len(scatter_dq) == 0:
-        work_dq.append(suspect)
+    # if on and len(scatter_dq) == 0:
+    #     work_dq.append(suspect)
         
-        near_pose, distance = findEmptyGrid(nx_grid, suspect[1])
-        place_order = ("place", near_pose, -1)
-        work_dq.append(place_order)
+    #     near_pose, distance = findEmptyGrid(nx_grid, suspect[1])
+    #     place_order = ("place", near_pose, -1)
+    #     work_dq.append(place_order)
         
-        scatter_place_order = ("place", suspect[1], -1)
-        scatter_pick_order = ("pick", near_pose, -1)
-        scatter_dq.appendleft(scatter_pick_order)
-        scatter_dq.appendleft(scatter_place_order)
+    #     scatter_place_order = ("place", suspect[1], -1)
+    #     scatter_pick_order = ("pick", near_pose, -1)
+    #     scatter_dq.appendleft(scatter_pick_order)
+    #     scatter_dq.appendleft(scatter_place_order)
 
-        return False
+    #     return False
+    # if on:
+    #     tmp = len(grid[suspect[1][0]][suspect[1][1]]) - suspect[2]
+    #     sub_dq = dq()
+    #     for _ in range(tmp):
+    #         near_pose, distance = findEmptyGrid(nx_grid, suspect[1])
+    #         # 가장 가까운 빈 공간으로 이동
+    #         move_order = ("move", robot_pose, near_pose)
+    #         # 내려놓기
+    #         place_order = ("place", near_pose, -1) # 기존 층 위에 쌓는 -1
+            
+    #         sub_dq.extendleft([])
     
     # 해당 위치 위에 있지 않을 때
-    elif suspect[1] is not robot_pose:        
+    if suspect[1] is not robot_pose:        
         work_dq.append(suspect) # stack처럼 사용
         
         move_order = ("move", robot_pose, suspect[1])
         work_dq.append(move_order)
         return False
     
-    elif on and load:
-        work_dq.append(suspect)
+    # elif on and load:
+    #     work_dq.append(suspect)
         
-        near_pose, distance = findEmptyGrid(nx_grid, suspect[1])
-        place_order = ("place", near_pose, -1)
-        work_dq.append(place_order)
-        return False
+    #     near_pose, distance = findEmptyGrid(nx_grid, suspect[1])
+    #     place_order = ("place", near_pose, -1)
+    #     work_dq.append(place_order)
+    #     return False
     
-    elif on:
-        work_dq.append(suspect)
+    # elif on:
+    #     work_dq.append(suspect)
         
-        pick_order = ("pick", suspect[1], -1)
-        work_dq.append(pick_order)
-        return False
+    #     pick_order = ("pick", suspect[1], -1)
+    #     work_dq.append(pick_order)
+    #     return False
     else:
         return True
 
@@ -191,7 +206,6 @@ def move(robot_pose, target_pose):
         print(f"        move col {diff[0]}")
         robot_orientation = "row"
         print(f"        move row {diff[1]}")
-        
     
 
 max_v = 0.3 # 0.3m/s
@@ -220,7 +234,7 @@ grid[1][1].append(("test2", 1, 1))
 # grid[2][1].append(("test3", 2, 1))
 
 pick_order = ("pick", (1, 1), 1) # (2, 2)의 1층을 집음
-place_order = ("place", (2, 1), 1) # level이 -1인 경우 기존 층 위에 쌓음
+place_order = ("place", (0, 0), -1) # level이 -1인 경우 기존 층 위에 쌓음
 
 work_dq.appendleft(pick_order) # que처럼 사용
 work_dq.appendleft(place_order)
@@ -239,16 +253,16 @@ while len(work_dq) != 0:
     elif suspect[0] == "move":
         comuMove(suspect)
 
-while len(scatter_dq) != 0:
-    print(scatter_dq)
-    suspect = scatter_dq.pop()
-    if suspect[0] == "pick":
-        sign = checkPick(suspect)
-        if sign:
-            comuPick(suspect)
-    elif suspect[0] == "place":
-        sign = checkPlace(suspect)
-        if sign:
-            comuPlace()
-    elif suspect[0] == "move":
-        comuMove(suspect)
+# while len(scatter_dq) != 0:
+#     print(scatter_dq)
+#     suspect = scatter_dq.pop()
+#     if suspect[0] == "pick":
+#         sign = checkPick(suspect)
+#         if sign:
+#             comuPick(suspect)
+#     elif suspect[0] == "place":
+#         sign = checkPlace(suspect)
+#         if sign:
+#             comuPlace()
+#     elif suspect[0] == "move":
+#         comuMove(suspect)

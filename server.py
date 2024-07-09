@@ -67,7 +67,7 @@ def start_server(host, port):
         handle_client(client_socket)
 
 if __name__ == "__main__":
-    HOST = '127.0.0.1'
-    PORT = 65432
+    HOST = '172.20.10.5'
+    PORT = 3333
 
     start_server(HOST, PORT)
