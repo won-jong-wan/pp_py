@@ -1,0 +1,9 @@
+mmov 1
+pmov 1
+rol
+pik 1
+plc 1
+
+bgct47264
+sudo chmod a+rw /dev/ttyUSB0
+

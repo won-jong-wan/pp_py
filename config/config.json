@@ -1,0 +1,14 @@
+{
+    "max_v": 0.3,
+    "max_a": 0.4,
+    "rotate_delay": 2,
+    
+    "cols": 2,
+    "rows": 3,
+    "level": 3,
+    
+    "base": 0,
+    "start_orientation": "row",
+    "id_max": 0
+}
+
