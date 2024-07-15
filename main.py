@@ -121,27 +121,29 @@ class Server:
             writer = csv.writer(file)
             writer.writerows(self.work_dq.grid)
 
-if __name__ == "__main__":
-    host = '192.168.0.7'
-    port = 12345
-    if len(sys.argv) == 3:
-        host = sys.argv[1]
-        port = int(sys.argv[2])
-
-    server = Server(host, port)
-    server.start()
-
 # if __name__ == "__main__":
-#     workDq = WorkDq()
-    
-#     workDq.grid[1][1].append(("test", 0, 1))
-#     workDq.grid[1][1].append(("test2", 1, 1))
-#     # grid[2][1].append(("test3", 2, 1))
+#     host = '192.168.0.7'
+#     port = 12345
+#     if len(sys.argv) == 3:
+#         host = sys.argv[1]
+#         port = int(sys.argv[2])
 
-#     pick_order = ("pick", (1, 1), 1) # (2, 2)의 1층을 집음
-#     place_order = ("place", (0, 0), -1) # level이 -1인 경우 기존 층 위에 쌓음
+#     server = Server(host, port)
+#     server.start()
 
-#     workDq.work_dq.appendleft(pick_order) # que처럼 사용
-#     workDq.work_dq.appendleft(place_order)
+if __name__ == "__main__":
+    workDq = WorkDq()
     
-#     workDq.workDqRun()
+    workDq.grid[1][1].append(("test", 0, 1))
+    workDq.grid[1][1].append(("test2", 1, 1))
+    workDq.grid[0][0].append(("test3", 2, 1))
+
+    pick_order = ("pick", (1, 1), 1) # (2, 2)의 1층을 집음
+    place_order = ("place", (0, 0), 1) # level이 -1인 경우 기존 층 위에 쌓음
+
+    workDq.work_dq.appendleft(pick_order) # que처럼 사용
+    workDq.work_dq.appendleft(place_order)
+    
+    workDq.run()
+    
+    print(workDq.str)

@@ -30,7 +30,7 @@ class WorkDq:
         while queue:
             current, dist = queue.popleft()
             
-            if targetCondition(current, dist):
+            if targetCondition(current, dist) and current not in self.black_list:
                 self.black_list.append(current)
                 return current, dist
 
@@ -43,7 +43,7 @@ class WorkDq:
 
     def findEmptyGrid(self, nx_grid, target_pose):
         # important part # fix needed
-        targetCondition = lambda node, dist: len(self.grid[node[0]][node[1]]) < self.grid_level and node != target_pose and node != self.black_list
+        targetCondition = lambda node, dist: len(self.grid[node[0]][node[1]]) < self.grid_level and node != target_pose
         
         result_node, distance =self.customBfs(self.nx_grid, target_pose, targetCondition)
         
@@ -107,7 +107,9 @@ class WorkDq:
         ## 들고 있던 화물 내려놓기
         ## 막고 있는 화물 치우기
         ## 내려놓은 화물 집기
-        on = len(self.grid[suspect[1][0]][suspect[1][1]]) >= suspect[2] and suspect[2] != -1 
+        stack_high = len(self.grid[suspect[1][0]][suspect[1][1]])
+        target_level = suspect[2]
+        on = stack_high >= target_level and target_level != -1 
         # load = robot_load[0] != "none"
         
         # if on and len(scatter_dq) == 0:
@@ -135,8 +137,31 @@ class WorkDq:
                 
         #         sub_dq.extendleft([])
         
+        if on:
+            self.work_dq.append(suspect)
+            
+            sub_dq = dq()
+            near0, dis0 = self.findEmptyGrid(self.nx_grid, suspect[1])
+            
+            place0 = ("place", near0, -1)
+            
+            sub_dq.appendleft(place0)
+            
+            for i in range(stack_high - target_level + 1):
+                pick = ("pick", suspect[1], -1)
+                near, dis = self.findEmptyGrid(self.nx_grid, suspect[1])
+                place = ("place", near, -1)
+                
+                sub_dq.extendleft([pick, place])
+            
+            pick1 = ("pick", near0, -1)
+            
+            sub_dq.extendleft([pick1])
+            
+            self.work_dq.extend(sub_dq)
+        
         # 해당 위치 위에 있지 않을 때
-        if suspect[1] is not self.robot_pose:        
+        elif suspect[1] is not self.robot_pose:        
             self.work_dq.append(suspect) # stack처럼 사용
             
             move_order = ("move", self.robot_pose, suspect[1])
