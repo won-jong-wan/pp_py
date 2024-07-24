@@ -299,7 +299,7 @@ class WorkDq:
                 self.comuMove(self.suspect)
             
             
-        self.str =self.str+"!"
+        self.str = self.str[:len(self.str)-1]+"!>"
         return self.str
 
     def vals(self, cols, rows, start_pose, start_orientation):
@@ -328,8 +328,8 @@ class WorkDq:
         self.work_dq = dq()
         self.scatter_dq = dq()
         
-        self.str = "@"
+        self.str = "<@"
         self.pas_icon = "#"
         
-    def __init__(self, cols=2, rows=3, start_pose=(0, 0), start_orientation="row"):
+    def __init__(self, cols=2, rows=3, start_pose=(0, 0), start_orientation="col"):
         self.vals(cols, rows, start_pose, start_orientation)

@@ -41,16 +41,20 @@ class Server:
             while not self.message_queue.empty():
                 time.sleep(1)
             
-            message = input("target load(ex: 1 1 1): ").split()
+            message = input("Act: ").split()
             # print(message)
             
             if message[0] == "quit":
                 self.running = False
-            elif len(message) != 3:
-                continue
+            elif message[0] == "pick":
+                detail = input("Pose: ").split()
+                self.message_queue.put(("pick", detail))
+            elif message[0] == "place":
+                detail = input("Pose: ").split()
+                self.message_queue.put(("place", detail))
             else:
-                input_num = [int(i) for i in message]
-                self.message_queue.put(input_num)
+                #input_num = [int(i) for i in message]
+                continue
 
         self.server_socket.close()
         print("서버를 종료합니다.")
@@ -60,7 +64,7 @@ class Server:
             try:
                 self.server_socket.settimeout(1.0)  # 1초 타임아웃 설정
                 client_socket, addr = self.server_socket.accept()
-                print(f"\n클라이언트가 {addr}에서 연결되었습니다.\ntarget load(ex: 1 1 1): ", end="")
+                print(f"\n클라이언트가 {addr}에서 연결되었습니다.\n : ", end="")
                 
                 # 클라이언트 처리를 위한 새 스레드 시작
                 threading.Thread(target=self.handleClient, args=(client_socket,), daemon=True).start()
@@ -74,10 +78,19 @@ class Server:
         try:
             while self.running:
                 try:
-                    input_num = self.message_queue.get(timeout=1.0)
+                    order = self.message_queue.get(timeout=1.0)   
                     
-                    message = self.setAndRunWorkDq(input_num)
+                    message = "empty"
                     
+                    if order[0] == "pick":
+                        order_num = [int(i) for i in order[1]]
+                        message = self.pickWorkDq(order_num)
+                    elif order[0] == "place":
+                        order_num = [int(i) for i in order[1]]
+                        message = self.placeWorkDq(order_num)
+                    # message = self.pickWorkDq(input_num)
+                    # message = "<@pik 1#plc 1!>"
+                    # message = "<@pov 1#rol 0#pov 1#pik 1#mov 1!>"
                     client_socket.send(message.encode('utf-8'))
                     # print(f"메시지를 전송했습니다: {message}")
                     self.resetWorkDq()
@@ -89,16 +102,29 @@ class Server:
     def initWorkDq(self):
         self.work_dq = WorkDq()
         
-        with open('grid.csv', 'r', encoding='utf-8') as file:
-            csv_reader = csv.reader(file)
-            for row in csv_reader:
-                self.work_dq.grid.append(row)
+        # with open('grid.csv', 'r', encoding='utf-8') as file:
+        #     csv_reader = csv.reader(file)
+        #     for row in csv_reader:
+        #         self.work_dq.grid.append(row)
             
-        self.work_dq.grid[1][1].append(("test", 0, 1))
-        self.work_dq.grid[1][1].append(("test2", 1, 1))
+        # self.work_dq.grid[0][0].append(("001", 0))
+        self.work_dq.grid[0][0].append(("001", 0))
+        self.work_dq.grid[0][1].append(("011", 1))
+        self.work_dq.grid[0][1].append(("012", 1.5))
+        self.work_dq.grid[1][0].append(("101", 2))
+        self.work_dq.grid[1][0].append(("102", 3))
+        self.work_dq.grid[2][0].append(("201", 4))
+        self.work_dq.grid[2][0].append(("202", 5))
+        self.work_dq.grid[1][1].append(("111", 6))
+        self.work_dq.grid[1][1].append(("112", 7))
+        self.work_dq.grid[2][1].append(("211", 8))
+        # self.work_dq.grid[2][1].append(("212", 9))
+        
+        # self.work_dq.grid[2][1].append(("test3", 2, 1))
+        # self.work_dq.grid[2][1].append(("test3", 2, 1))
         # grid[2][1].append(("test3", 2, 1))
     
-    def setAndRunWorkDq(self, input_num):
+    def pickWorkDq(self, input_num):
         pick_order = ("pick", (input_num[0], input_num[1]), input_num[2]) # (2, 2)의 1층을 집음
         place_order = ("place", self.work_dq.pick_up_pose, -1) # level이 -1인 경우 기존 층 위에 쌓음
 
@@ -113,37 +139,53 @@ class Server:
         
         return message
     
+    def placeWorkDq(self, input_num):
+        pick_order = ("pick", self.work_dq.pick_up_pose, -1) # (2, 2)의 1층을 집음
+        place_order = ("place", (input_num[0], input_num[1]), input_num[2]) # level이 -1인 경우 기존 층 위에 쌓음
+
+        self.work_dq.work_dq.appendleft(pick_order) # que처럼 사용
+        self.work_dq.work_dq.appendleft(place_order)
+        
+        print("log: ")
+        
+        message = self.work_dq.run()
+        
+        print("\nsend message: "+message)
+        
+        return message
+    
     def resetWorkDq(self):
         self.work_dq.black_list = [self.work_dq.pick_up_pose]
-        self.work_dq.str = "@"
+        self.work_dq.str = "<@"
         
         with open('grid.csv', 'wt', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerows(self.work_dq.grid)
 
-# if __name__ == "__main__":
-#     host = '192.168.0.7'
-#     port = 12345
-#     if len(sys.argv) == 3:
-#         host = sys.argv[1]
-#         port = int(sys.argv[2])
-
-#     server = Server(host, port)
-#     server.start()
-
 if __name__ == "__main__":
-    workDq = WorkDq()
-    
-    workDq.grid[1][1].append(("test", 0, 1))
-    workDq.grid[1][1].append(("test2", 1, 1))
-    workDq.grid[0][0].append(("test3", 2, 1))
+    host = '192.168.0.8'
+    port = 12345
+    if len(sys.argv) == 3:
+        host = sys.argv[1]
+        port = int(sys.argv[2])
 
-    pick_order = ("pick", (1, 1), 1) # (2, 2)의 1층을 집음
-    place_order = ("place", (0, 0), 1) # level이 -1인 경우 기존 층 위에 쌓음
+    server = Server(host, port)
+    server.start()
 
-    workDq.work_dq.appendleft(pick_order) # que처럼 사용
-    workDq.work_dq.appendleft(place_order)
+# if __name__ == "__main__":
+#     workDq = WorkDq()
     
-    workDq.run()
+#     workDq.grid[1][1].append(("test", 0))
+#     workDq.grid[1][1].append(("test2", 1))
+#     workDq.grid[0][0].append(("test3", 2))
+#     workDq.grid[0][0].append(("test3", 3))
+
+#     pick_order = ("pick", (1, 1), 1) # (2, 2)의 1층을 집음
+#     place_order = ("place", (0, 0), 1) # level이 -1인 경우 기존 층 위에 쌓음
+
+#     workDq.work_dq.appendleft(pick_order) # que처럼 사용
+#     workDq.work_dq.appendleft(place_order)
     
-    print(workDq.str)
+#     workDq.run()
+    
+#     print(workDq.str)

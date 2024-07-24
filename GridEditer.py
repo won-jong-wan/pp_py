@@ -9,6 +9,7 @@ Created on Thu Jul 11 16:12:42 2024
 from WorkDq import WorkDq
 import csv
 import json
+from collections import OrderedDict
 import os
 
 class GridEditer:
@@ -17,9 +18,13 @@ class GridEditer:
         self.base = base
         self.size = size
         
+        self.goods = OrderedDict()
+        self.config = OrderedDict()
+        
+        self.goods_file = os.path.join(csv_path, "item.json")
         self.config_file = os.path.join(config_path, "config.json")
         with open(self.config_file) as file:
-            self.config_data = json.load(file)
+            self.config = json.load(file)
             self.id_max = self.config_data["id_max"]
         
         self.csv_file = os.path.join(csv_path, "grid.csv")
