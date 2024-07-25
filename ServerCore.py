@@ -128,11 +128,11 @@ class ServerCore:
     #         print(f"처리 중: {source}로부터의 메시지 - {message}")
     #         # 여기에 메시지 처리 로직을 추가하세요
     #         message_queue.task_done()
-    def set_robot_host_port(self, host, port):
+    def set_robot_host_port(self, host= "192.168.0.8", port= 12345):
         self.robot_host = host
         self.robot_port = port
         
-    def set_local_host_port(self, host, port):
+    def set_local_host_port(self, host= "localhost", port= 8888):
         self.local_host = host
         self.local_port = port
     
@@ -161,15 +161,15 @@ class ServerCore:
         self.send_message_queue = queue.Queue()
         self.get_message_queue = queue.Queue()
 
-if __name__ == "__main__":
-    ROBOT_HOST = '192.168.0.8'  # 모든 인터페이스에서 외부 연결 허용
-    ROBOT_PORT = 12345       # 외부에서 접속할 포트
-    LOCAL_HOST = 'localhost'   # 로컬 연결만 허용
-    LOCAL_PORT = 8888          # 로컬에서 접속할 포트
+# if __name__ == "__main__":
+#     ROBOT_HOST = '192.168.0.8'  # 모든 인터페이스에서 외부 연결 허용
+#     ROBOT_PORT = 12345       # 외부에서 접속할 포트
+#     LOCAL_HOST = 'localhost'   # 로컬 연결만 허용
+#     LOCAL_PORT = 8888          # 로컬에서 접속할 포트
     
-    core = ServerCore()
+#     core = ServerCore()
     
-    core.set_robot_host_port(ROBOT_HOST, ROBOT_PORT)
-    core.set_local_host_port(LOCAL_HOST, LOCAL_PORT)
+#     core.set_robot_host_port(ROBOT_HOST, ROBOT_PORT)
+#     core.set_local_host_port(LOCAL_HOST, LOCAL_PORT)
     
-    core.start_server()
+#     core.start_server()

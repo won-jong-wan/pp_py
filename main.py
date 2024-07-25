@@ -123,6 +123,8 @@ class Server:
         # self.work_dq.grid[2][1].append(("test3", 2, 1))
         # self.work_dq.grid[2][1].append(("test3", 2, 1))
         # grid[2][1].append(("test3", 2, 1))
+        
+        self.work_dq.str = "<@"
     
     def pickWorkDq(self, input_num):
         pick_order = ("pick", (input_num[0], input_num[1]), input_num[2]) # (2, 2)의 1층을 집음
@@ -133,7 +135,7 @@ class Server:
         
         print("log: ")
         
-        message = self.work_dq.run()
+        message = self.work_dq.run()+"!>"
         
         print("send message: "+message)
         
@@ -148,7 +150,7 @@ class Server:
         
         print("log: ")
         
-        message = self.work_dq.run()
+        message = self.work_dq.run()+"!>"
         
         print("\nsend message: "+message)
         
