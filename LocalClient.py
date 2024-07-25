@@ -19,7 +19,7 @@ class LocalClient:
                 data = local_socket.recv(1024).decode('utf-8')
                 if not data:
                     continue
-                print(f"(message)_recv: {data}")
+                print(f"\n(message)_recv: {data}")
                 self.get_queue.put(data)
                 # client_socket.send("메시지를 받았습니다.".encode('utf-8'))
             except Exception as e:
@@ -35,7 +35,7 @@ class LocalClient:
             try:
                 if not self.send_queue.empty():
                     data = self.send_queue.get() 
-                    print(f"(message)_core_to_local: {data}")
+                    print(f"\n(message)_core_to_local: {data}")
                     local_socket.send(data.encode('utf-8'))
                 else:
                     time.sleep(0.1)

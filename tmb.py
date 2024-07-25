@@ -18,7 +18,7 @@ app = typer.Typer()
 algo_app = typer.Typer()
 editer_app = typer.Typer()
 
-app.add_typer(algo_app, name="algo")
+app.add_typer(algo_app, name="algo", help="")
 app.add_typer(editer_app, name="edit")
 
 @app.command()
@@ -38,7 +38,7 @@ def raw(commend: Annotated[Optional[str],typer.Argument(help="pov: move position
                                           +"plc: place load")] = None,
     num: Annotated[Optional[str],typer.Argument(help="pov and mov -> [block num]\n\n"
                                       +"rol -> (x to y/ y to x) [0/1]\n\n"
-                                      +"pik and plc -> [pick or place level] warning! ground level is 1\n")] = None,
+                                      +"pik and plc -> [pick or place level]\n\n/*warning! ground level is 1*/")] = None,
     long: Annotated[Optional[str], typer.Option(help="send long str\n\neach commends split by #")]=None):
     local_client = LocalClient()
     if long:
@@ -53,6 +53,12 @@ def pik(x: Annotated[Optional[int], typer.Argument()] = None,
         y: Annotated[Optional[int], typer.Argument()] = None,
         level: Annotated[Optional[int], typer.Argument()] = None):
     
+    """
+    pick goods from (x, y, level) to (0, 0, -1)
+    
+    (0, 0, -1) mean top of (0, 0)
+    """
+    
     num = [x, y, level]
     
     algo = AlgoClient()
@@ -65,6 +71,12 @@ def pik(x: Annotated[Optional[int], typer.Argument()] = None,
 def plc(x: Annotated[Optional[int], typer.Argument()] = None,
         y: Annotated[Optional[int], typer.Argument()] = None,
         level: Annotated[Optional[int], typer.Argument()] = None):
+    
+    """
+    place goods from (0, 0, -1) to (x, y, level)
+    
+    (0, 0, -1) mean top of (0, 0)
+    """
     
     num = [x, y, level]
     

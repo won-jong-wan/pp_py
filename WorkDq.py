@@ -18,6 +18,25 @@ class WorkDq:
         t_total = t_acc*2 + t_static
         return t_total
     
+    def findLevel(self, target_pose):
+        min_level = 3
+        
+        max_level = 1
+        
+        for x in range(self.rows):
+            for y in range(self.cols):
+                node = tuple([x, y])
+                
+                is_free = node not in self.black_list and node != target_pose
+                
+                if min_level > len(self.grid[x][y]) and is_free:
+                    min_level = len(self.grid[x][y])
+                
+                if max_level < len(self.grid[x][y]) and is_free:
+                    max_level = len(self.grid[x][y])
+        
+        return min_level, max_level
+    
     ######## BFS
     def create2dGrid(self,rows, cols):
         G = nx.grid_2d_graph(rows, cols)
@@ -30,8 +49,7 @@ class WorkDq:
         while queue:
             current, dist = queue.popleft()
             
-            if targetCondition(current, dist) and current not in self.black_list:
-                self.black_list.append(current)
+            if targetCondition(current, dist, start):
                 return current, dist
 
             for neighbor in G.neighbors(current):
@@ -41,15 +59,35 @@ class WorkDq:
         
         return None, -1  # 조건을 만족하는 노드를 찾지 못한 경우
 
-    def findEmptyGrid(self, nx_grid, target_pose):
+    def findEmptyGrid(self, nx_grid, target_pose, is_temp= False):
         # important part # fix needed
-        targetCondition = lambda node, dist: len(self.grid[node[0]][node[1]]) < self.grid_level and node != target_pose
+        def targetCondition(node, dist, target_pose):
+            
+            min_level, max_level = self.findLevel(target_pose)
+            
+            node_level = len(self.grid[node[0]][node[1]])        
+            
+            is_over_max_flag = node_level >= self.grid_level
+            is_target_flag = node == target_pose
+            is_blackL_flag = node in self.black_list
+            
+            if is_temp:
+                is_min_level = node_level != min_level
+            else:
+                is_min_level = node_level == min_level
+            
+            is_ok = not is_over_max_flag and not is_target_flag and not is_blackL_flag and is_min_level
+            
+            if is_ok and is_temp:
+                self.black_list.append(node)
+            
+            return is_ok
         
         result_node, distance =self.customBfs(self.nx_grid, target_pose, targetCondition)
         
         if result_node:
             print(f"    fine near node: {result_node}") 
-            print(f"    distance from target_pose: {distance}")
+            print(f"    distance from target_pose: {distance}\n")
             return result_node, distance
         else:
             print("can't find near node")
@@ -141,7 +179,7 @@ class WorkDq:
             self.work_dq.append(suspect)
             
             sub_dq = dq()
-            near0, dis0 = self.findEmptyGrid(self.nx_grid, suspect[1])
+            near0, dis0 = self.findEmptyGrid(self.nx_grid, suspect[1], is_temp= True)
             
             place0 = ("place", near0, -1)
             
@@ -318,7 +356,7 @@ class WorkDq:
         # 이름이 none이면 비어있는 것
         
         self.grid = [[[]for col in range(self.cols)]for row in range(self.rows)]
-        self.black_list = [(0, 0)] # pick up place
+        self.black_list = [self.pick_up_pose] # pick up place
         self.nx_grid = self.create2dGrid(rows, cols)
         
         # with open('grid.csv', 'w', newline='', encoding='utf-8') as file:
