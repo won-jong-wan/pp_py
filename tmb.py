@@ -14,15 +14,19 @@ from LocalClient import LocalClient
 from ServerCore import ServerCore
 from AlgoClient import AlgoClient
 
-app = typer.Typer()
+app = typer.Typer(rich_markup_mode="rich")
 algo_app = typer.Typer()
 editer_app = typer.Typer()
 
-app.add_typer(algo_app, name="algo", help="")
-app.add_typer(editer_app, name="edit")
+app.add_typer(algo_app, name="algo", help="Running algorithm")
+app.add_typer(editer_app, name="edit", help="Edit all grid")
 
 @app.command()
 def core():
+    """
+    Start server between [bold red]robot and local[/bold red]
+    """
+    
     core = ServerCore()
     
     core.set_robot_host_port()
@@ -31,15 +35,24 @@ def core():
     core.start_server()
 
 @app.command()
-def raw(commend: Annotated[Optional[str],typer.Argument(help="pov: move position way\n\n"
-                                          +"mov: move negative way\n\n"
-                                          +"rol: rotate direction\n\n"
-                                          +"pik: pick load\n\n"
-                                          +"plc: place load")] = None,
-    num: Annotated[Optional[str],typer.Argument(help="pov and mov -> [block num]\n\n"
-                                      +"rol -> (x to y/ y to x) [0/1]\n\n"
-                                      +"pik and plc -> [pick or place level]\n\n/*warning! ground level is 1*/")] = None,
-    long: Annotated[Optional[str], typer.Option(help="send long str\n\neach commends split by #")]=None):
+def raw(commend: Annotated[Optional[str],typer.Argument(help="[bold green]pov:[/bold green] move position way\n\n"
+                                          +"[bold green]mov:[/bold green] move negative way\n\n"
+                                          +"[bold green]rol:[/bold green] rotate direction\n\n"
+                                          +"[bold green]pik:[/bold green] pick load\n\n"
+                                          +"[bold green]plc:[/bold green] place load")] = None,
+    num: Annotated[Optional[str],typer.Argument(help="[bold green]pov and mov =>[/bold green] \[block num] \n\n"
+                                      +"[bold green]rol(x to y/ y to x) =>[/bold green] \[0/1] \n\n"
+                                      +"[bold green]pik and plc =>[/bold green] \[pick or place level]\n\n[bold red]\[warning! ground level is 1][bold red]")] = None,
+    long: Annotated[Optional[str], typer.Option(help="send [bold]long str[/bold]\n\n each commends split by \"#\"")]=None):
+    
+    """
+    Send single commend and num
+    
+    use --long to send long str 
+        
+    [italic]ex: python tmb.py raw --long "rol 0#mov 1"[/italic]
+    """
+    
     local_client = LocalClient()
     if long:
         local_client.is_long = True
@@ -54,7 +67,7 @@ def pik(x: Annotated[Optional[int], typer.Argument()] = None,
         level: Annotated[Optional[int], typer.Argument()] = None):
     
     """
-    pick goods from (x, y, level) to (0, 0, -1)
+    Pick goods from (x, y, level) to (0, 0, -1)
     
     (0, 0, -1) mean top of (0, 0)
     """
@@ -89,50 +102,11 @@ def plc(x: Annotated[Optional[int], typer.Argument()] = None,
 @algo_app.command()
 def sort(step: Annotated[Optional[int], typer.Argument()] = 1):
     
+    """
+    Sort goods
+    """
+    
     print(f"sort {step} time")
-    
-# def main(
-#     part: str,
-#     commend: Annotated[Optional[str],typer.Argument(help="pov: move position way\n"
-#                                          +"mov: move negative way\n"
-#                                          +"rol: rotate direction\n"
-#                                          +"pik: pick load\n"
-#                                          +"plc: place load")] = None,
-#     num: Annotated[Optional[str],typer.Argument(help="pov and mov -> [block num]\n"
-#                                      +"rol -> (x to y/ y to x) [0/1]\n"
-#                                      +"pik and plc -> [pick or place level] warning! ground level is 1\n")] = None,
-#     # formal: Annotated[
-#     #     bool,
-#     #     typer.Option(
-#     #         help="Say hi formally.", rich_help_panel="Customization and Utils"
-#     #     ),
-#     # ] = False,
-#     # debug: Annotated[
-#     #     bool,
-#     #     typer.Option(
-#     #         help="Enable debugging.", rich_help_panel="Customization and Utils"
-#     #     ),
-#     # ] = False,
-# ):
-#     # """
-#     # Say hi to NAME, optionally with a --lastname.
-
-#     # If --formal is used, say hi very formally.
-#     # """
-#     # if formal:
-#     #     print(f"Good day Ms. {name} {lastname}.")
-#     # else:
-#     #     print(f"Hello {name} {lastname}")
-    
-    
-#     if part == "raw":
-#         local_client = LocalClient()
-#         local_client.is_typer = True
-#         local_client.client_start(commend= commend, num= num)
-#     elif part == "alg":
-#         print("alg!")
-        
-
 
 if __name__ == "__main__":
     app()
