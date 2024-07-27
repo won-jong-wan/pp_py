@@ -9,10 +9,14 @@ from typing import Optional
 
 import typer
 from typing_extensions import Annotated
+from rich.console import Console
+from rich.table import Table
+from rich import print
 
 from LocalClient import LocalClient
 from ServerCore import ServerCore
 from AlgoClient import AlgoClient
+from GridEditer import GridEditer
 
 app = typer.Typer(rich_markup_mode="rich")
 algo_app = typer.Typer()
@@ -103,10 +107,103 @@ def plc(x: Annotated[Optional[int], typer.Argument()] = None,
 def sort(step: Annotated[Optional[int], typer.Argument()] = 1):
     
     """
-    Sort goods
+    Sort goods high level to low level
+    
+    num mean sort 
     """
     
-    print(f"sort {step} time")
+    algo = AlgoClient()
+    algo.initWorkDq()
+    
+    log = algo.sortWorkDq(step)
+    algo.client_start(log= log)
+    
+def print_grid(gridEditer, target = (0, 0, -1)):
+    grid = gridEditer.grid
+    target_y = target[1]
+    
+    len_x = len(grid)
+    # len_y = len(grid[target_y])
+    
+    table = Table(title = "y = "+str(target_y))
+    
+    for x in range(len_x):
+        table.add_column("x = "+str(x))
+    
+    max_level = gridEditer.config_dic["grid_level"]
+    col_list = [[] for level in range(max_level)]
+    
+    for x in range(len_x):
+        len_level = len(grid[x][target_y])
+        
+        # level_diff = max_level - len_level
+        
+        for levelr in range(max_level):
+            level = max_level-levelr
+            
+            #col_list[levelr].append(str(level))
+            if level > len_level:
+                col_list[levelr].append("")
+            elif level <= len_level:
+                col_list[levelr].append(grid[x][target_y][level-1][0])
+                # print(grid[x][target_y][level-1][0])
+            
+    
+    for col in range(len(col_list)):
+        table.add_row(col_list[col][0], col_list[col][1], col_list[col][2])
+    
+    console = Console()
+    console.print(table)
+    
+    
+    
+@editer_app.command()
+def add(name: Annotated[Optional[str], typer.Argument()] = "default",
+        x: Annotated[Optional[int], typer.Argument()] = 0,
+                y: Annotated[Optional[int], typer.Argument()] = 0,
+                level: Annotated[Optional[int], typer.Argument()] = -1):
+    """
+    add goods
+    """
+    gred = GridEditer()
+    gred.add_goods(name, (x, y, level))
+    gred.write_files()
+    
+    print_grid(gred, (x, y, level))
+    
+@editer_app.command("del")
+def del_(x: Annotated[Optional[int], typer.Argument()] = 0,
+                y: Annotated[Optional[int], typer.Argument()] = 0,
+                level: Annotated[Optional[int], typer.Argument()] = -1):
+    """
+    del goods
+    """
+    gred = GridEditer()
+    gred.del_goods_as_pose((x, y, level))
+    gred.write_files()
+    
+    print_grid(gred, (x, y, level))
+    
+@editer_app.command()
+def view():
+    """
+    view grid
+    """
+    gred = GridEditer()
+    
+    print_grid(gred)
+    print_grid(gred, (0, 1, 0))
+    gred.write_files()
 
+@editer_app.command()
+def config():
+    """
+    view config
+    """
+    gred = GridEditer()
+    
+    print(gred.config_dic)
+    gred.write_files()
+    
 if __name__ == "__main__":
     app()

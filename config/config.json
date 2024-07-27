@@ -1,14 +1,24 @@
 {
+    "cols": 2,
+    "rows": 3,
+    "grid_level": 3,
+    "pick_up_pose": [
+        0,
+        0
+    ],
     "max_v": 0.3,
     "max_a": 0.4,
     "rotate_delay": 2,
-    
-    "cols": 2,
-    "rows": 3,
-    "level": 3,
-    
-    "base": 0,
-    "start_orientation": "row",
-    "id_max": 0
+    "robot_pose": [
+        0,
+        0
+    ],
+    "robot_orientation": "col",
+    "robot_load": [
+        "none",
+        0,
+        -1
+    ],
+    "pas_icon": "#",
+    "id_max": 17
 }
-

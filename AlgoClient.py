@@ -8,12 +8,13 @@ Created on Thu Jul 25 16:38:11 2024
 
 from WorkDq import WorkDq
 from LocalClient import LocalClient
-
-import csv
+from GridEditer import GridEditer
 
 class AlgoClient(LocalClient):
     def initWorkDq(self):
-        self.work_dq = WorkDq()
+        self.grid_edit = GridEditer()
+        
+        self.work_dq = WorkDq(self.grid_edit)
         
         # with open('grid.csv', 'r', encoding='utf-8') as file:
         #     csv_reader = csv.reader(file)
@@ -21,17 +22,17 @@ class AlgoClient(LocalClient):
         #         self.work_dq.grid.append(row)
             
         # self.work_dq.grid[0][0].append(("001", 0))
-        self.work_dq.grid[0][0].append(("001", 0))
-        # self.work_dq.grid[0][1].append(("011", 1))
-        # self.work_dq.grid[0][1].append(("012", 1.5))
-        self.work_dq.grid[1][0].append(("101", 2))
-        self.work_dq.grid[1][0].append(("102", 3))
-        self.work_dq.grid[2][0].append(("201", 4))
-        self.work_dq.grid[2][0].append(("202", 5))
-        self.work_dq.grid[1][1].append(("111", 6))
-        self.work_dq.grid[1][1].append(("112", 7))
-        self.work_dq.grid[2][1].append(("211", 8))
-        self.work_dq.grid[2][1].append(("212", 9))
+        # self.work_dq.grid[0][0].append(("001", 0))
+        # # self.work_dq.grid[0][1].append(("011", 1))
+        # # self.work_dq.grid[0][1].append(("012", 1.5))
+        # self.work_dq.grid[1][0].append(("101", 2))
+        # self.work_dq.grid[1][0].append(("102", 3))
+        # self.work_dq.grid[2][0].append(("201", 4))
+        # self.work_dq.grid[2][0].append(("202", 5))
+        # self.work_dq.grid[1][1].append(("111", 6))
+        # self.work_dq.grid[1][1].append(("112", 7))
+        # self.work_dq.grid[2][1].append(("211", 8))
+        # self.work_dq.grid[2][1].append(("212", 9))
         
         # self.work_dq.grid[2][1].append(("test3", 2, 1))
         # self.work_dq.grid[2][1].append(("test3", 2, 1))
@@ -58,6 +59,17 @@ class AlgoClient(LocalClient):
 
         self.work_dq.work_dq.appendleft(pick_order) # que처럼 사용
         self.work_dq.work_dq.appendleft(place_order)
+        
+        print("log: ")
+        
+        message = self.work_dq.run()
+        
+        print("\nsend message: "+message+"\n")
+        
+        return message
+    
+    def sortWorkDq(self, input_num):
+        self.work_dq.sort_ord_generator()
         
         print("log: ")
         

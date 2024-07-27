@@ -5,10 +5,10 @@ Created on Thu Jul 11 15:46:18 2024
 
 @author: won
 """
+from GridEditer import GridEditer
 
 from collections import deque as dq
 import networkx as nx
-import csv
 
 class WorkDq:
     def calcMonoTime(self, target_s):
@@ -319,6 +319,62 @@ class WorkDq:
         
         return
     
+    ######## sort
+    def find_accord_grid(self, robot_pose, accord_condition, blocking = False):
+        def targetCondition(node, dist, target_pose):
+            
+            min_level, max_level = self.findLevel(target_pose)
+            
+            node_level = len(self.grid[node[0]][node[1]])        
+            
+            is_over_max_flag = node_level >= self.grid_level
+            is_target_flag = node == target_pose
+            is_blackL_flag = node in self.black_list
+            
+            if accord_condition == "high":
+                is_accord_level = node_level == max_level
+            elif accord_condition == "low":
+                is_accord_level = node_level == min_level
+            
+            is_ok = not is_over_max_flag and not is_target_flag and not is_blackL_flag and is_accord_level
+            
+            if is_ok and blocking:
+                self.black_list.append(node)
+            
+            return is_ok
+        
+        result_node, distance =self.customBfs(self.nx_grid, tuple(robot_pose), targetCondition)
+        
+        if result_node:
+            print(f"    fine accord node: {result_node}") 
+            print(f"    distance from robot_pose: {distance}\n")
+            return result_node, distance
+        else:
+            print("can't find near node")
+            
+        return None, -1
+    
+    def sort_ord_generator(self):
+        min_level, max_level = self.findLevel(self.pick_up_pose)
+        
+        if not (max_level - min_level > 1):
+            print("no need to sort")
+            return False
+        
+        high_node, distance = self.find_accord_grid(self.robot_pose, "high")
+        low_node, distance = self.find_accord_grid(high_node, "low")
+        
+        sub_dq = dq()
+        
+        pick = ("pick", high_node, -1)
+        place = ("place", low_node, -1)
+        
+        sub_dq.extendleft([pick, place])
+        
+        self.work_dq.extendleft(sub_dq)
+        
+        return True
+    
     ######## Run
     def run(self):
         
@@ -336,38 +392,53 @@ class WorkDq:
             elif self.suspect[0] == "move":
                 self.comuMove(self.suspect)
             
+            self.gridEditer.write_files()
+            
             
         self.str = self.str[:len(self.str)-1] # +"!>"
         return self.str
-
-    def vals(self, cols, rows, start_pose, start_orientation):
-        self.max_v = 0.3 # 0.3m/s
-        self.max_a = 0.4 # 1m/s^2
-        self.rotate_delay = 2 # 2초
+    
+    def reset(self):
+        self.black_list = [self.work_dq.pick_up_pose]
+        self.work_dq.str = "" #"<@"
+    
+    # def vals(self, cols, rows, start_pose, start_orientation):
+    def vals(self):
         
-        self.cols = cols
-        self.rows = rows
-        self.grid_level = 3
+        self.gridEditer.read_files()
         
-        self.pick_up_pose = (0, 0)
-        self.robot_pose = start_pose # 몇 번째 열인지, 몇 번째 행인지
-        self.robot_orientation = start_orientation # row or col
-        self.robot_load = ("none", 0, 0) # (이름, id, priority)
-        # 이름이 none이면 비어있는 것
+        config_dic = self.gridEditer.config_dic
+        grid = self.gridEditer.grid
         
-        self.grid = [[[]for col in range(self.cols)]for row in range(self.rows)]
+        # grid information
+        self.cols = config_dic["cols"] # cols
+        self.rows = config_dic["rows"] # rows
+        self.grid_level = config_dic["grid_level"] # 3
+        self.pick_up_pose = config_dic["pick_up_pose"] # (0, 0)
+        
+        # robot information
+        self.max_v = config_dic["max_v"] # 0.3 # 0.3m/s
+        self.max_a = config_dic["max_a"] # 0.4 # 1m/s^2
+        self.rotate_delay = config_dic["rotate_delay"] # 2 # 2초
+        
+        self.robot_pose = config_dic["robot_pose"]  # (0, 0)
+        self.robot_orientation = config_dic["robot_orientation"] # "col"
+        self.robot_load = config_dic["robot_load"] # ("none", 0, -1)
+        
+        # define vals
+        self.grid = grid # [[[]for col in range(self.cols)]for row in range(self.rows)]
         self.black_list = [self.pick_up_pose] # pick up place
-        self.nx_grid = self.create2dGrid(rows, cols)
-        
-        # with open('grid.csv', 'w', newline='', encoding='utf-8') as file:
-        #     writer = csv.writer(file)
-        #     writer.writerows(self.grid)
+        self.nx_grid = self.create2dGrid(self.rows, self.cols)
         
         self.work_dq = dq()
         self.scatter_dq = dq()
         
+        # message option
         self.str ="" # "<@"
-        self.pas_icon = "#"
+        self.pas_icon = config_dic["pas_icon"] # "#"
         
-    def __init__(self, cols=2, rows=3, start_pose=(0, 0), start_orientation="col"):
-        self.vals(cols, rows, start_pose, start_orientation)
+    # def __init__(self, cols=2, rows=3, start_pose=(0, 0), start_orientation="col"):
+    #     self.vals(cols, rows, start_pose, start_orientation)
+    def __init__(self, gridEditer = GridEditer()):
+        self.gridEditer = gridEditer
+        self.vals()
