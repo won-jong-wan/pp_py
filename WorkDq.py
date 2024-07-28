@@ -332,11 +332,14 @@ class WorkDq:
             is_blackL_flag = node in self.black_list
             
             if accord_condition == "high":
-                is_accord_level = node_level == max_level
+                is_accord_level = (node_level == max_level)
+                is_over_max_flag = False
             elif accord_condition == "low":
-                is_accord_level = node_level == min_level
+                is_accord_level = (node_level == min_level)
             
             is_ok = not is_over_max_flag and not is_target_flag and not is_blackL_flag and is_accord_level
+            
+            # print(f"ok: {is_ok} target: {node} node_level: {node_level} max_level: {max_level}")
             
             if is_ok and blocking:
                 self.black_list.append(node)
@@ -357,10 +360,13 @@ class WorkDq:
     def sort_ord_generator(self):
         min_level, max_level = self.findLevel(self.pick_up_pose)
         
-        if not (max_level - min_level > 1):
+        print(f"min: {min_level}, max: {max_level}")
+        
+        if max_level - min_level <= 1:
             print("no need to sort")
             return False
         
+        # print(self.robot_pose)
         high_node, distance = self.find_accord_grid(self.robot_pose, "high")
         low_node, distance = self.find_accord_grid(high_node, "low")
         
@@ -369,7 +375,7 @@ class WorkDq:
         pick = ("pick", high_node, -1)
         place = ("place", low_node, -1)
         
-        sub_dq.extendleft([pick, place])
+        sub_dq.extendleft([place, pick])
         
         self.work_dq.extendleft(sub_dq)
         
@@ -414,16 +420,16 @@ class WorkDq:
         self.cols = config_dic["cols"] # cols
         self.rows = config_dic["rows"] # rows
         self.grid_level = config_dic["grid_level"] # 3
-        self.pick_up_pose = config_dic["pick_up_pose"] # (0, 0)
+        self.pick_up_pose = tuple(config_dic["pick_up_pose"]) # (0, 0)
         
         # robot information
         self.max_v = config_dic["max_v"] # 0.3 # 0.3m/s
         self.max_a = config_dic["max_a"] # 0.4 # 1m/s^2
         self.rotate_delay = config_dic["rotate_delay"] # 2 # 2초
         
-        self.robot_pose = config_dic["robot_pose"]  # (0, 0)
+        self.robot_pose = tuple(config_dic["robot_pose"])  # (0, 0)
         self.robot_orientation = config_dic["robot_orientation"] # "col"
-        self.robot_load = config_dic["robot_load"] # ("none", 0, -1)
+        self.robot_load = tuple(config_dic["robot_load"]) # ("none", 0, -1)
         
         # define vals
         self.grid = grid # [[[]for col in range(self.cols)]for row in range(self.rows)]

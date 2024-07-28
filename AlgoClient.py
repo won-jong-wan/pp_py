@@ -53,10 +53,16 @@ class AlgoClient(LocalClient):
         
         return message
     
-    def placeWorkDq(self, input_num):
+    def placeWorkDq(self, input_num, is_auto):
         pick_order = ("pick", self.work_dq.pick_up_pose, -1) # (2, 2)의 1층을 집음
         place_order = ("place", (input_num[0], input_num[1]), input_num[2]) # level이 -1인 경우 기존 층 위에 쌓음
-
+        
+        if is_auto:
+            grEd = self.work_dq.gridEditer
+            auto_target = self.work_dq.find_accord_grid(tuple(grEd.config_dic["pick_up_pose"]), "low")
+            
+            place_order = ("place", auto_target[0], -1)
+        
         self.work_dq.work_dq.appendleft(pick_order) # que처럼 사용
         self.work_dq.work_dq.appendleft(place_order)
         
@@ -65,18 +71,30 @@ class AlgoClient(LocalClient):
         message = self.work_dq.run()
         
         print("\nsend message: "+message+"\n")
-        
+    
         return message
     
-    def sortWorkDq(self, input_num):
-        self.work_dq.sort_ord_generator()
+    def sortWorkDq(self, input_num, loop = False):
+        is_need_sort = self.work_dq.sort_ord_generator()
+        message = ""
+        tmp = 0
         
         print("log: ")
         
-        message = self.work_dq.run()
+        message = message + self.work_dq.run()
         
         print("\nsend message: "+message+"\n")
         
+        while loop and is_need_sort and tmp < input_num:
+            print("log: ")
+            
+            message = message + self.work_dq.run()
+            
+            print("\nsend message: "+message+"\n")
+            
+            tmp = tmp +1
+            is_need_sort = self.work_dq.sort_ord_generator()
+            
         return message
     
     # def resetWorkDq(self):

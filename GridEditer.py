@@ -90,6 +90,8 @@ class GridEditer:
         grid[1][1].append(("112", 6))
         grid[2][1].append(("211", 7))
         grid[2][1].append(("212", 8))
+        grid[2][1].append(("213", 9))
+        grid[2][0].append(("203", 10))
         
         # for reset end #
         

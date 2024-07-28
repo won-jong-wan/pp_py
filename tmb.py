@@ -66,9 +66,10 @@ def raw(commend: Annotated[Optional[str],typer.Argument(help="[bold green]pov:[/
         local_client.client_start(commend= commend, num= num)
         
 @algo_app.command()
-def pik(x: Annotated[Optional[int], typer.Argument()] = None,
-        y: Annotated[Optional[int], typer.Argument()] = None,
-        level: Annotated[Optional[int], typer.Argument()] = None):
+def pik(x: Annotated[Optional[int], typer.Argument()] = 0,
+        y: Annotated[Optional[int], typer.Argument()] = 0,
+        level: Annotated[Optional[int], typer.Argument()] = -1,
+        comu: Annotated[Optional[bool], typer.Option()] = True):
     
     """
     Pick goods from (x, y, level) to (0, 0, -1)
@@ -82,29 +83,48 @@ def pik(x: Annotated[Optional[int], typer.Argument()] = None,
     algo.initWorkDq()
     
     log = algo.pickWorkDq(num)
-    algo.client_start(log= log)
+    
+    if comu == True:
+        algo.client_start(log= log)
+    view()
     
 @algo_app.command()
-def plc(x: Annotated[Optional[int], typer.Argument()] = None,
-        y: Annotated[Optional[int], typer.Argument()] = None,
-        level: Annotated[Optional[int], typer.Argument()] = None):
+def plc(x: Annotated[Optional[int], typer.Argument()] = 0,
+        y: Annotated[Optional[int], typer.Argument()] = 0,
+        level: Annotated[Optional[int], typer.Argument()] = -1,
+        comu: Annotated[Optional[bool], typer.Option()] = True,
+        auto: Annotated[Optional[bool], typer.Option()] = False):
     
     """
     place goods from (0, 0, -1) to (x, y, level)
     
     (0, 0, -1) mean top of (0, 0)
     """
-    
-    num = [x, y, level]
-    
     algo = AlgoClient()
     algo.initWorkDq()
     
-    log = algo.placeWorkDq(num)
-    algo.client_start(log= log)
+    grEd = algo.work_dq.gridEditer
+    pick_up_pose = tuple(grEd.config_dic["pick_up_pose"])
+    grid = grEd.grid
     
+    if len(grid[pick_up_pose[0]][pick_up_pose[0]]) <=0:
+        add()
+        
+        algo.work_dq.vals()
+    
+    num = [x, y, level]
+
+    log = algo.placeWorkDq(num, auto)
+    
+    if comu == True:
+        algo.client_start(log= log)
+    
+    view()
+
 @algo_app.command()
-def sort(step: Annotated[Optional[int], typer.Argument()] = 1):
+def sort(step: Annotated[Optional[int], typer.Argument()] = 1, 
+         comu: Annotated[Optional[bool], typer.Option()] = True,
+         loop: Annotated[Optional[bool], typer.Option()] = False):
     
     """
     Sort goods high level to low level
@@ -115,9 +135,15 @@ def sort(step: Annotated[Optional[int], typer.Argument()] = 1):
     algo = AlgoClient()
     algo.initWorkDq()
     
-    log = algo.sortWorkDq(step)
-    algo.client_start(log= log)
+    if loop:
+        step = 20
     
+    log = algo.sortWorkDq(step, loop= loop)
+    if comu == True:
+        algo.client_start(log= log)
+        
+    view()
+
 def print_grid(gridEditer, target = (0, 0, -1)):
     grid = gridEditer.grid
     target_y = target[1]
@@ -152,6 +178,8 @@ def print_grid(gridEditer, target = (0, 0, -1)):
     for col in range(len(col_list)):
         table.add_row(col_list[col][0], col_list[col][1], col_list[col][2])
     
+    table.show_lines = True
+    
     console = Console()
     console.print(table)
     
@@ -161,7 +189,7 @@ def print_grid(gridEditer, target = (0, 0, -1)):
 def add(name: Annotated[Optional[str], typer.Argument()] = "default",
         x: Annotated[Optional[int], typer.Argument()] = 0,
                 y: Annotated[Optional[int], typer.Argument()] = 0,
-                level: Annotated[Optional[int], typer.Argument()] = -1):
+                level: Annotated[Optional[int], typer.Option()] = -1):
     """
     add goods
     """
@@ -169,12 +197,12 @@ def add(name: Annotated[Optional[str], typer.Argument()] = "default",
     gred.add_goods(name, (x, y, level))
     gred.write_files()
     
-    print_grid(gred, (x, y, level))
+    view()
     
 @editer_app.command("del")
 def del_(x: Annotated[Optional[int], typer.Argument()] = 0,
                 y: Annotated[Optional[int], typer.Argument()] = 0,
-                level: Annotated[Optional[int], typer.Argument()] = -1):
+                level: Annotated[Optional[int], typer.Option()] = -1):
     """
     del goods
     """
@@ -182,7 +210,7 @@ def del_(x: Annotated[Optional[int], typer.Argument()] = 0,
     gred.del_goods_as_pose((x, y, level))
     gred.write_files()
     
-    print_grid(gred, (x, y, level))
+    view()
     
 @editer_app.command()
 def view():
@@ -191,8 +219,8 @@ def view():
     """
     gred = GridEditer()
     
-    print_grid(gred)
     print_grid(gred, (0, 1, 0))
+    print_grid(gred)
     gred.write_files()
 
 @editer_app.command()
@@ -204,6 +232,17 @@ def config():
     
     print(gred.config_dic)
     gred.write_files()
+
+@editer_app.command()
+def reset():
+    """
+    view config
+    """
+    gred = GridEditer()
+    
+    gred.make_default_files()
+    view()
+    
     
 if __name__ == "__main__":
     app()
