@@ -9,6 +9,7 @@ Created on Thu Jul 25 16:38:11 2024
 from WorkDq import WorkDq
 from LocalClient import LocalClient
 from GridEditer import GridEditer
+from rich import print
 
 class AlgoClient(LocalClient):
     def initWorkDq(self):
@@ -38,18 +39,40 @@ class AlgoClient(LocalClient):
         # self.work_dq.grid[2][1].append(("test3", 2, 1))
         # grid[2][1].append(("test3", 2, 1))
     
-    def pickWorkDq(self, input_num):
-        pick_order = ("pick", (input_num[0], input_num[1]), input_num[2]) # (2, 2)의 1층을 집음
+    def pickWorkDq(self, input_num = None, name= ""):
+        grEd = self.work_dq.gridEditer
+        
+        grid = grEd.grid
+        
+        num = input_num
+        
+        if name != "":
+            len_x = len(grid)
+            len_y = len(grid[0])
+            
+            for x in range(len_x):
+                for y in range(len_y):
+                    len_level = len(grid[x][y])
+                    if len_level <= 0:
+                        continue
+                    for level in range(len_level):
+                        is_target = grid[x][y][level][0] == name
+                        if is_target:
+                            num = [x, y, level+1]
+            num = tuple(num)
+                    
+        
+        pick_order = ("pick", (num[0], num[1]), num[2]) # (2, 2)의 1층을 집음
         place_order = ("place", self.work_dq.pick_up_pose, -1) # level이 -1인 경우 기존 층 위에 쌓음
 
         self.work_dq.work_dq.appendleft(pick_order) # que처럼 사용
         self.work_dq.work_dq.appendleft(place_order)
         
-        print("log: ")
+        print("\n\nlog: ")
         
         message = self.work_dq.run()
         
-        print("send message: "+message)
+        print(f"\n\nsend message: [green]{message}[/green]\n")
         
         return message
     
@@ -66,11 +89,11 @@ class AlgoClient(LocalClient):
         self.work_dq.work_dq.appendleft(pick_order) # que처럼 사용
         self.work_dq.work_dq.appendleft(place_order)
         
-        print("log: ")
+        print("\n\nlog: ")
         
         message = self.work_dq.run()
         
-        print("\nsend message: "+message+"\n")
+        print(f"\n\nsend message: [green]{message}[/green]\n")
     
         return message
     
@@ -79,18 +102,18 @@ class AlgoClient(LocalClient):
         message = ""
         tmp = 0
         
-        print("log: ")
+        print("\n\nlog: ")
         
         message = message + self.work_dq.run()
         
-        print("\nsend message: "+message+"\n")
+        print(f"\n\nsend message: [green]{message}[/green]\n")
         
         while loop and is_need_sort and tmp < input_num:
-            print("log: ")
+            print("\n\nlog: ")
             
-            message = message + self.work_dq.run()
+            message = self.work_dq.run()
             
-            print("\nsend message: "+message+"\n")
+            print(f"\n\nsend message: [green]{message}[/green]\n")
             
             tmp = tmp +1
             is_need_sort = self.work_dq.sort_ord_generator()

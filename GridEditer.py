@@ -79,19 +79,29 @@ class GridEditer:
         
         # for reset #
         
-        grid[0][0].append(("001", 0))
-        # self.work_dq.grid[0][1].append(("011", 1))
-        # self.work_dq.grid[0][1].append(("012", 1.5))
-        grid[1][0].append(("101", 1))
-        grid[1][0].append(("102", 2))
-        grid[2][0].append(("201", 3))
-        grid[2][0].append(("202", 4))
-        grid[1][1].append(("111", 5))
-        grid[1][1].append(("112", 6))
-        grid[2][1].append(("211", 7))
-        grid[2][1].append(("212", 8))
-        grid[2][1].append(("213", 9))
-        grid[2][0].append(("203", 10))
+        grid[0][1].append(("A", 0))
+        grid[0][1].append(("B", 1))
+        grid[1][0].append(("D", 2))
+        grid[1][0].append(("C", 3))
+        grid[1][1].append(("H", 4))
+        grid[1][1].append(("I", 5))
+        grid[2][0].append(("J", 6))
+        grid[2][0].append(("G", 7))
+        grid[2][1].append(("F", 8))
+        grid[2][1].append(("E", 9))
+        # grid[0][0].append(("001", 0))
+        # # self.work_dq.grid[0][1].append(("011", 1))
+        # # self.work_dq.grid[0][1].append(("012", 1.5))
+        # grid[1][0].append(("101", 1))
+        # grid[1][0].append(("102", 2))
+        # grid[2][0].append(("201", 3))
+        # grid[2][0].append(("202", 4))
+        # grid[1][1].append(("111", 5))
+        # grid[1][1].append(("112", 6))
+        # grid[2][1].append(("211", 7))
+        # grid[2][1].append(("212", 8))
+        # grid[2][1].append(("213", 9))
+        # grid[2][0].append(("203", 10))
         
         # for reset end #
         
@@ -154,6 +164,23 @@ class GridEditer:
                 target_grid.remove(target_grid[pose_level-1])
                 
                 return tmp
+    def del_goods_as_name(self, name):
+        grid = self.grid
+        
+        len_x = len(grid)
+        len_y = len(grid[0])
+        
+        for x in range(len_x):
+            for y in range(len_y):
+                len_level = len(grid[x][y])
+                if len_level <= 0:
+                    continue
+                for level in range(len_level):
+                    is_target = grid[x][y][level][0] == name
+                    if is_target:
+                        num = [x, y, level+1]
+        num = tuple(num)
+        self.del_goods_as_pose(num)
         
     
     def __init__(self, csv_path="./csv", config_path="./config"):

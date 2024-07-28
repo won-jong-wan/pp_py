@@ -10,6 +10,8 @@ import threading
 import queue
 import time
 
+from rich import print
+
 class ServerCore:
     def handle_robot_to_core(self, robot_socket, addr):
         print(f"(thread_start)_robot_to_core: {addr}")

@@ -10,6 +10,8 @@ import threading
 import queue
 import time
 
+from rich import print
+
 class LocalClient:
     def recv(self, local_socket, addr):
         print(f"(thread_start)_recv: {addr}")
@@ -19,13 +21,13 @@ class LocalClient:
                 data = local_socket.recv(1024).decode('utf-8')
                 if not data:
                     continue
-                print(f"\n(message)_recv: {data}")
+                print(f"\n[orange](message)[/orange]_recv: {data}")
                 self.get_queue.put(data)
                 # client_socket.send("메시지를 받았습니다.".encode('utf-8'))
             except Exception as e:
-                print(f"(error)_recv: {e}")
+                print(f"[red](error)[/red]_recv: {e}")
                 break
-        print(f"(thread_end)_recv: {addr}")  
+        print(f"[orange](thread_end)[/orange]_recv: {addr}")  
         local_socket.close()
     
     def send(self, local_socket, addr):
@@ -46,7 +48,7 @@ class LocalClient:
         local_socket.close()
     
     def client_start(self, host= "localhost", port= 8888, commend= "", num= "", log= ""):
-        print("Local Client Start")
+        print("\n\n[pink]Local Client Start[/pink]")
         
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -54,7 +56,7 @@ class LocalClient:
         try:
             #server.settimeout(1.0) 
             client.connect((host, port))
-            print(f"(client_start)_client_connect_{host}:{port}")
+            print(f"[orange](client_start)[/orange]_client_connect_{host}:{port}")
             
             recv_thread = threading.Thread(target=self.recv, 
                                                     args=(client, host)) 
@@ -67,7 +69,7 @@ class LocalClient:
             recv_thread.start()
             send_thread.start()
         except Exception as e:
-            print(f"(error)_client: {e}")
+            print(f"[red](error)[/red]_client: {e}")
             
         if self.is_typer:
             self.typer_queue(commend, num)
@@ -101,16 +103,19 @@ class LocalClient:
                 self.running = False
             else:
                 # input_num = [int(i) for i in message]
-                self.send_queue.put("<@"+message+"!>")
+                self.send_queue.put("<@{message}!>")
                 continue
                 
         print("(stop)_fill_queue")
     
     def typer_queue(self, commend, num):
-        self.send_queue.put("<@"+commend+" "+num+"!>")
+        self.send_queue.put(f"<@{commend} {num}!>")
         
     def long_fill_queue(self, log):
-        self.send_queue.put("<@"+log+"!>")
+        self.send_queue.put(f"<@{log}!>")
+        
+    # def long_raw_queue(self, log):
+    #     self.send_queue.put(f"<@{log}!>")
         
     def __init__(self):
         self.send_queue = queue.Queue()

@@ -6,6 +6,7 @@ Created on Thu Jul 11 15:46:18 2024
 @author: won
 """
 from GridEditer import GridEditer
+from rich import print
 
 from collections import deque as dq
 import networkx as nx
@@ -384,6 +385,9 @@ class WorkDq:
     ######## Run
     def run(self):
         
+        if len(self.str) !=0:
+            self.str = self.str+self.pas_icon
+        
         while len(self.work_dq) != 0:
             # print(work_dq)
             self.suspect = self.work_dq.pop()
@@ -398,7 +402,7 @@ class WorkDq:
             elif self.suspect[0] == "move":
                 self.comuMove(self.suspect)
             
-            self.gridEditer.write_files()
+            self.semi_save()
             
             
         self.str = self.str[:len(self.str)-1] # +"!>"
@@ -407,6 +411,13 @@ class WorkDq:
     def reset(self):
         self.black_list = [self.work_dq.pick_up_pose]
         self.work_dq.str = "" #"<@"
+        
+    def semi_save(self):
+        self.gridEditer.config_dic["robot_orientation"] = self.robot_orientation
+        self.gridEditer.config_dic["robot_load"] = self.robot_load
+        self.gridEditer.config_dic["robot_pose"] = self.robot_pose
+        
+        self.gridEditer.write_files()
     
     # def vals(self, cols, rows, start_pose, start_orientation):
     def vals(self):

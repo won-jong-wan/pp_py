@@ -7,6 +7,7 @@ Created on Thu Jul 25 15:22:00 2024
 """
 from typing import Optional
 
+import os
 import typer
 from typing_extensions import Annotated
 from rich.console import Console
@@ -69,7 +70,8 @@ def raw(commend: Annotated[Optional[str],typer.Argument(help="[bold green]pov:[/
 def pik(x: Annotated[Optional[int], typer.Argument()] = 0,
         y: Annotated[Optional[int], typer.Argument()] = 0,
         level: Annotated[Optional[int], typer.Argument()] = -1,
-        comu: Annotated[Optional[bool], typer.Option()] = True):
+        comu: Annotated[Optional[bool], typer.Option()] = True,
+        name: Annotated[Optional[str], typer.Option()] = ""):
     
     """
     Pick goods from (x, y, level) to (0, 0, -1)
@@ -82,7 +84,7 @@ def pik(x: Annotated[Optional[int], typer.Argument()] = 0,
     algo = AlgoClient()
     algo.initWorkDq()
     
-    log = algo.pickWorkDq(num)
+    log = algo.pickWorkDq(num, name)
     
     if comu == True:
         algo.client_start(log= log)
@@ -148,6 +150,8 @@ def print_grid(gridEditer, target = (0, 0, -1)):
     grid = gridEditer.grid
     target_y = target[1]
     
+    robot_pose = tuple(gridEditer.config_dic["robot_pose"])
+    
     len_x = len(grid)
     # len_y = len(grid[target_y])
     
@@ -159,6 +163,15 @@ def print_grid(gridEditer, target = (0, 0, -1)):
     max_level = gridEditer.config_dic["grid_level"]
     col_list = [[] for level in range(max_level)]
     
+    if robot_pose[1] == target_y:
+        col_list = [[] for level in range(max_level+1)]
+        if robot_pose[0] == 0:
+            col_list[0].extend(["robot", "", ""])
+        elif robot_pose[0] == 1:
+            col_list[0].extend(["", "robot", ""])
+        elif robot_pose[0] == 2:
+            col_list[0].extend(["", "", "robot"])
+    
     for x in range(len_x):
         len_level = len(grid[x][target_y])
         
@@ -167,11 +180,15 @@ def print_grid(gridEditer, target = (0, 0, -1)):
         for levelr in range(max_level):
             level = max_level-levelr
             
+            levell = levelr
+            if robot_pose[1] == target_y:
+                levell = levelr+1
+            
             #col_list[levelr].append(str(level))
             if level > len_level:
-                col_list[levelr].append("")
+                col_list[levell].append("")
             elif level <= len_level:
-                col_list[levelr].append(grid[x][target_y][level-1][0])
+                col_list[levell].append(grid[x][target_y][level-1][0])
                 # print(grid[x][target_y][level-1][0])
             
     
@@ -202,12 +219,17 @@ def add(name: Annotated[Optional[str], typer.Argument()] = "default",
 @editer_app.command("del")
 def del_(x: Annotated[Optional[int], typer.Argument()] = 0,
                 y: Annotated[Optional[int], typer.Argument()] = 0,
-                level: Annotated[Optional[int], typer.Option()] = -1):
+                level: Annotated[Optional[int], typer.Option()] = -1,
+                name: Annotated[Optional[str], typer.Option()] = None ):
     """
     del goods
     """
     gred = GridEditer()
-    gred.del_goods_as_pose((x, y, level))
+    
+    if name:
+        gred.del_goods_as_name(name)
+    else:
+        gred.del_goods_as_pose((x, y, level))
     gred.write_files()
     
     view()
@@ -219,8 +241,14 @@ def view():
     """
     gred = GridEditer()
     
+    print("")
     print_grid(gred, (0, 1, 0))
+    print("")
     print_grid(gred)
+    
+    robot_orientation = gred.config_dic["robot_orientation"]
+    print(f"\nrobot_orientation: [bold blue]{robot_orientation}[/bold blue]\n")
+    
     gred.write_files()
 
 @editer_app.command()
@@ -232,11 +260,13 @@ def config():
     
     print(gred.config_dic)
     gred.write_files()
+    
+    os.system("gedit ./config/config.json")
 
 @editer_app.command()
 def reset():
     """
-    view config
+    reset config and grid
     """
     gred = GridEditer()
     
