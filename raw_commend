@@ -1,3 +1,5 @@
 리니어 전진/후진: z/x
 볼 스크류 위아래: Q/E q/e
 다운 파트 위 아래: R/T r/t
+
+tmb raw --long "pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1"

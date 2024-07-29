@@ -13,11 +13,11 @@
         0,
         0
     ],
-    "robot_orientation": "col",
+    "robot_orientation": "row",
     "robot_load": [
         "none",
         0,
-        -1
+        0
     ],
     "pas_icon": "#",
     "id_max": 9

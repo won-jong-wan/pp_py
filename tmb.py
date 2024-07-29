@@ -145,6 +145,22 @@ def sort(step: Annotated[Optional[int], typer.Argument()] = 1,
         algo.client_start(log= log)
         
     view()
+    
+@algo_app.command()
+def home():
+    """
+
+    Back to home
+
+    """
+    
+    algo = AlgoClient()
+    algo.initWorkDq()
+    
+    log = algo.backToHome()
+    algo.client_start(log=log)
+    
+    view()
 
 def print_grid(gridEditer, target = (0, 0, -1)):
     grid = gridEditer.grid

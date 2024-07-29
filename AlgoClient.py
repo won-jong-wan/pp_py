@@ -120,6 +120,23 @@ class AlgoClient(LocalClient):
             
         return message
     
+    def backToHome(self):
+        
+        base = self.work_dq.pick_up_pose
+        robot_pose = self.work_dq.robot_pose
+        
+        move_order = ("move", robot_pose, base)
+        
+        self.work_dq.work_dq.appendleft(move_order)
+        
+        print("\n\nlog: ")
+        
+        message = self.work_dq.run()
+        
+        print(f"\n\nsend message: [green]{message}[/green]\n")
+        
+        return message
+    
     # def resetWorkDq(self):
     #     self.work_dq.black_list = [self.work_dq.pick_up_pose]
     #     self.work_dq.str = "" #"<@"
