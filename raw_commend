@@ -2,4 +2,15 @@
 볼 스크류 위아래: Q/E q/e
 다운 파트 위 아래: R/T r/t
 
-tmb raw --long "pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1#pov 1#mov 1"
+tmb raw --long "pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2#pov 2#mov 2"
+
+
+###명령어
+tmb algo pik 2 1 1
+tmb algo plc 1 1 1
+tmb algo sort
+tmb algo home
+tmb raw --long "rol 1"
+
+tmb edit reset
+tmb raw --long "r"
