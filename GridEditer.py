@@ -49,6 +49,8 @@ class GridEditer:
         with open(self.csv_path, "r") as csv_file:
             reader = csv.reader(csv_file)
             for line in reader:
+                if len(line) == 0:
+                    continue
                 grid[int(line[2])][int(line[3])].append(line[0:2])
         return grid
     

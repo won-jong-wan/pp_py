@@ -18,6 +18,7 @@ from LocalClient import LocalClient
 from ServerCore import ServerCore
 from AlgoClient import AlgoClient
 from GridEditer import GridEditer
+from Visualizer import Visualizer
 
 app = typer.Typer(rich_markup_mode="rich")
 algo_app = typer.Typer()
@@ -266,6 +267,9 @@ def view():
     print(f"\nrobot_orientation: [bold blue]{robot_orientation}[/bold blue]\n")
     
     gred.write_files()
+    
+    visualizer = Visualizer(gred)
+    visualizer.run()
 
 @editer_app.command()
 def config():

@@ -37,7 +37,7 @@ class LocalClient:
             try:
                 if not self.send_queue.empty():
                     data = self.send_queue.get() 
-                    print(f"\n(message)_core_to_local: {data}")
+                    print(f"\n(message)_local_to_core: {data}")
                     local_socket.send(data.encode('utf-8'))
                 else:
                     time.sleep(0.1)
