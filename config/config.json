@@ -10,10 +10,10 @@
     "max_a": 0.4,
     "rotate_delay": 2,
     "robot_pose": [
-        2,
-        1
+        0,
+        0
     ],
-    "robot_orientation": "col",
+    "robot_orientation": "row",
     "robot_load": [
         "none",
         0,
